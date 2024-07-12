@@ -1,5 +1,8 @@
+# need to send join hung-cool to twilio whatsapp number to activate twilio sandbox.
+# After it will be able to send whatsapp messages.
 import requests, smtplib, os
 from datetime import datetime
+from twilio.rest import Client
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -7,6 +10,8 @@ AV_API_KEY = os.environ['AV_API_KEY']
 NEWS_API_KEY = os.environ['NEWS_API_KEY']
 my_email = "marshhectar@gmail.com"
 password = os.environ['password']
+account_sid = os.environ['account_sid']
+auth_token = os.environ['auth_token']
 
 now = datetime.now()
 year = now.year
@@ -66,17 +71,22 @@ if pct_change <= -5 or pct_change >= 5:
                    f"{STOCK}: 🔻 {pct_change}%\n\n"
                    f"Headline: {news[n]['Headline']}\n\n"
                    f"Brief: {news[n]['Brief']}")
-        with smtplib.SMTP('smtp.gmail.com', 587) as connection:
-            connection.starttls()
-            connection.login(user=my_email, password=password)
-            if pct_change < 0:
-                connection.sendmail(from_addr=my_email, to_addrs=my_email,
-                                    msg=message_decrease.encode('utf-8')
-                                    )
-            else:
-                connection.sendmail(from_addr=my_email, to_addrs=my_email,
-                                    msg=message_increase.encode('utf-8')
-                                    )
+        if pct_change < 0:
+            client = Client(account_sid, auth_token)
+            message = client.messages.create(
+                from_="whatsapp:+14155238886",
+                body=f"{message_decrease}",
+                to="whatsapp:+917021615621",
+            )
+            print(message.status)
+        else:
+            client = Client(account_sid, auth_token)
+            message = client.messages.create(
+                from_="whatsapp:+14155238886",
+                body=f"{message_increase}",
+                to="whatsapp:+917021615621",
+            )
+            print(message.status)
 else:
     print('skip')
 
